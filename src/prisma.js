@@ -6,6 +6,12 @@ const prisma = new Prisma({
 });
 
 const createPostForUser = async (authorId, data) => {
+    const userExists = await prisma.exists.User({ id: authorId });
+
+    if (!userExists) {
+        throw new Error('User not found')
+    }
+
     const post = await prisma.mutation.createPost({
         data: {
             ...data,
@@ -15,44 +21,46 @@ const createPostForUser = async (authorId, data) => {
                 }
             }
         }
-    }, '{ id }');
-    const user = await prisma.query.user({
-        where: {
-            id: authorId
-        }
-    }, '{ id name email posts { id title published } }');
-    return user
+    }, '{ author { id name email posts { id title published } } }');
+
+    return post.author
 };
 
-const updatePostForUser = async (postId, data) => {
-    const post = await prisma.mutation.updatePost({
-        where: {
-            id: postId
-        },
-        data
-    }, '{ author { id } }');
-
-    const user = await prisma.query.user({
-        where: {
-            id: post.author.id
-        }
-    }, '{ id name email posts { id title body published } }');
-    return user
-
-};
-
-// createPostForUser('cjw568lyc009f0772cf8cqjoz', {
+// createPostForUser('cjw4xvqwk00170772q941ogbo', {
 //     title: 'Great books to read',
 //     body: 'The War of Art',
 //     published: true
 // }).then((user) => {
 //     console.log(JSON.stringify(user, undefined, 2))
+// }).catch((error) => {
+//     console.log(error.message)
 // });
 
-updatePostForUser(
-    'cjw59j1ck00u40772yw9visdq',
-    { body: 'The War of Art!!!', published: false
-    }).then((user) => {
-    console.log(JSON.stringify(user, undefined, 2))
-});
+const updatePostForUser = async (postId, data) => {
+    const postExists = await prisma.exists.Post({ id: postId });
+
+    if (!postExists) {
+        throw new Error('Post not found')
+    }
+
+    const post = await prisma.mutation.updatePost({
+        where: {
+            id: postId
+        },
+        data
+    }, ' { author { id name email posts { id title published } } }');
+
+    return post.author
+
+};
+
+
+// updatePostForUser(
+//     'cjw6p7k9y001t0829r3gh7lek',
+//     { body: 'The War of Art is the best book ever!', published: false
+//     }).then((user) => {
+//         console.log(JSON.stringify(user, undefined, 2))
+//     }).catch((error) => {
+//         console.log(error.message)
+//     });
 
