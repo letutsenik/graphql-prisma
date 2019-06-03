@@ -47,8 +47,10 @@ const Query = {
         //     return isTitleMatch || isBodyMatch
         // })
     },
-    comments(parent, args, { db }, info) {
-        return db.comments
+    comments(parent, args, { prisma }, info) {
+        const opArgs = {};
+
+        return prisma.query.comments(opArgs, info)
 
     },
     me() {
