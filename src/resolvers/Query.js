@@ -26,28 +26,42 @@ const Query = {
         // })
     },
     posts(parent, args, { prisma }, info) {
-        const opArgs = {};
+        const opArgs = {
+            where: {
+                published: true
+            }
+        };
 
         if (args.query) {
-            opArgs.where = {
-                OR: [{
-                    title_contains: args.query
-                }, {
-                    body_contains: args.query
-                }]
-            }
+            opArgs.where.OR = [{
+                title_contains: args.query
+            }, {
+                body_contains: args.query
+            }]
         }
 
         return prisma.query.posts(opArgs, info)
-        // if (!args.query) {
-        //     return db.posts
-        // }
-        //
-        // return db.posts.filter((post) => {
-        //     const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
-        //     const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
-        //     return isTitleMatch || isBodyMatch
-        // })
+    },
+    myPosts(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request);
+
+        const opArgs = {
+            where: {
+                author: {
+                    id: userId
+                }
+            }
+        };
+
+        if (args.query) {
+            opArgs.where.OR = [{
+                title_contains: args.query
+            }, {
+                body_contains: args.query
+            }]
+        }
+
+        return prisma.query.posts(opArgs, info)
     },
     comments(parent, args, { prisma }, info) {
         const opArgs = {};
