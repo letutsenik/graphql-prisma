@@ -9,7 +9,6 @@ const server = new GraphQLServer({
     typeDefs: './src/schema.graphql',
     resolvers,
     context(request) {
-        console.log(request.request.headers);
         return {
             db,
             pubsub,
